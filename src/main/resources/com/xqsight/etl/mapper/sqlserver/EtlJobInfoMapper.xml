@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xqsight.etl.mapper.sqlserver.EtlJobInfoMapper">
+
+    <resultMap id="BaseResultMap" type="com.xqsight.etl.domain.EtlJobInfo">
+        <id column="jsonName" jdbcType="VARCHAR" property="jsonName"/>
+        <result column="readerJdbc" jdbcType="VARCHAR" property="readerJdbc"/>
+        <result column="readerName" jdbcType="VARCHAR" property="readerName"/>
+        <result column="readerPword" jdbcType="VARCHAR" property="readerPword"/>
+        <result column="writerJdbc" jdbcType="VARCHAR" property="writerJdbc"/>
+        <result column="writerName" jdbcType="VARCHAR" property="writerName"/>
+        <result column="writerPword" jdbcType="VARCHAR" property="writerPword"/>
+        <result column="jobType" jdbcType="VARCHAR" property="jobType"/>
+        <result column="condition" jdbcType="VARCHAR" property="condition"/>
+        <result column="startTime" jdbcType="VARCHAR" property="startTime"/>
+        <result column="endTime" jdbcType="VARCHAR" property="endTime"/>
+        <result column="cron" jdbcType="VARCHAR" property="cron"/>
+        <result column="state" jdbcType="INTEGER" property="state"/>
+        <result column="locked" jdbcType="BIT" property="locked"/>
+        <result column="fullTableSynchronize" jdbcType="BIT" property="fullTableSynchronize"/>
+    </resultMap>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+        DELETE FROM etl_job_info
+        WHERE jsonName = #{jsonname,jdbcType=VARCHAR}
+     </delete>
+
+    <insert id="insert" parameterType="com.xqsight.etl.domain.EtlJobInfo">
+        INSERT INTO etl_job_info (
+            jsonName, readerJdbc, readerName,readerPword,
+            writerJdbc, writerName,writerPword, jobType, condition,startTime,
+            endTime, cron,state, locked,fullTableSynchronize)
+        VALUES(
+            #{jsonName,jdbcType=VARCHAR}, #{readerJdbc,jdbcType=VARCHAR}, #{readerName,jdbcType=VARCHAR}, #{readerPword,jdbcType=VARCHAR},
+            #{writerJdbc,jdbcType=VARCHAR}, #{writerName,jdbcType=VARCHAR}, #{writerPword,jdbcType=VARCHAR}, #{jobType,jdbcType=VARCHAR},
+            #{condition,jdbcType=VARCHAR}, #{startTime,jdbcType=VARCHAR}, #{endTime,jdbcType=VARCHAR}, #{cron,jdbcType=VARCHAR},
+            #{state,jdbcType=INTEGER}, #{locked,jdbcType=BIT}, #{fullTableSynchronize,jdbcType=BIT})
+    </insert>
+
+    <update id="updateByPrimaryKey" parameterType="com.xqsight.etl.domain.EtlJobInfo">
+        UPDATE etl_job_info SET
+        readerJdbc = #{readerJdbc,jdbcType=VARCHAR},
+        readerName = #{readerName,jdbcType=VARCHAR},
+        readerPword = #{readerPword,jdbcType=VARCHAR},
+        writerJdbc = #{writerJdbc,jdbcType=VARCHAR},
+        writerName = #{writerName,jdbcType=VARCHAR},
+        writerPword = #{writerPword,jdbcType=VARCHAR},
+        jobType = #{jobType,jdbcType=VARCHAR},
+        condition = #{condition,jdbcType=VARCHAR},
+        startTime = #{startTime,jdbcType=VARCHAR},
+        endTime = #{endTime,jdbcType=VARCHAR},
+        cron = #{cron,jdbcType=VARCHAR},
+        state = #{state,jdbcType=INTEGER},
+        <!-- <if test="newJsonname != null and newJsonname != ''">
+             jsonname=#{newJsonname,jdbcType=BIT},
+         </if>-->
+        locked = #{locked,jdbcType=BIT},
+        fullTableSynchronize = #{fullTableSynchronize,jdbcType=BIT}
+        WHERE jsonName = #{jsonName,jdbcType=VARCHAR}
+    </update>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT
+        jsonName, readerJdbc, readerName, readerPword, writerJdbc, writerName, writerPword,
+        jobType, condition, startTime, endTime, cron, state, locked, fullTableSynchronize
+        FROM etl_job_info
+        WHERE jsonName = #{jsonName,jdbcType=VARCHAR}
+    </select>
+
+    <select id="selectLikeJsonName" resultMap="BaseResultMap">
+        SELECT
+        jsonName, readerJdbc, readerName, readerPword, writerJdbc, writerName, writerPword,
+        jobType, condition, startTime, endTime, cron, state, locked, fullTableSynchronize
+        FROM etl_job_info
+        WHERE jsonName like '%${jsonName}%'
+    </select>
+
+    <select id="selectAllWithNoLock" resultMap="BaseResultMap">
+        SELECT
+        jsonName, readerJdbc, readerName, readerPword, writerJdbc, writerName, writerPword,
+        jobType, condition, startTime, endTime, cron, state, locked, fullTableSynchronize
+        FROM etl_job_info
+        WHERE locked=0
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT
+        jsonName, readerJdbc, readerName, readerPword, writerJdbc, writerName, writerPword,
+        jobType, condition, startTime, endTime, cron, state, locked, fullTableSynchronize
+        FROM etl_job_info
+    </select>
+
+    <select id="selectByIp" resultMap="BaseResultMap">
+        SELECT
+        jsonName, readerJdbc, readerName, readerPword, writerJdbc, writerName, writerPword,
+        jobType, condition, startTime, endTime, cron, state, locked, fullTableSynchronize
+        FROM etl_job_info
+        WHERE jsonName like '%${ip}%'
+    </select>
+
+    <update id="lockJobByName" parameterType="java.lang.String">
+        update etl_job_info SET locked = 1 WHERE jsonName = #{jsonName}
+    </update>
+
+    <update id="unlockJobAndUpdateState">
+        update etl_job_info set state = #{state} ,locked = 0
+        WHERE locked = 1 AND jsonName LIKE '%${jsonName}%'
+    </update>
+
+    <update id="unlockJob">
+        UPDATE etl_job_info SET locked = 0,fullTableSynchronize = 0
+        WHERE locked = 1 and jsonName like '%${jsonName}%'
+    </update>
+
+    <update id="updateJobStatus">
+        UPDATE etl_job_info SET state = #{status} WHERE jsonName=#{jsonName}
+    </update>
+
+    <update id="updateJobSuccessStatus" parameterType="com.xqsight.etl.domain.EtlJobInfo">
+        UPDATE etl_job_info
+        SET startTime = #{startTime}, endTime = #{endTime}, state = 0
+        WHERE jsonName = #{jsonName}
+    </update>
+
+    <insert id="register" parameterType="com.xqsight.etl.domain.EtlJobInfo">
+        INSERT INTO etl_job_info (
+        jsonName, readerJdbc, readerName,readerPword,
+        writerJdbc, writerName,writerPword, jobType, condition,startTime,
+        endTime, cron,state, locked, fullTableSynchronize)VALUES
+        <foreach collection="jobInfoList" item="item" index="index" separator=",">
+            ( #{item.jsonName,jdbcType=VARCHAR}, #{item.readerJdbc,jdbcType=VARCHAR},
+            #{item.readerName,jdbcType=VARCHAR}, #{item.readerPword,jdbcType=VARCHAR},
+            #{item.writerJdbc,jdbcType=VARCHAR}, #{item.writerName,jdbcType=VARCHAR},
+            #{item.writerPword,jdbcType=VARCHAR}, #{item.jobType,jdbcType=VARCHAR},
+            #{item.condition,jdbcType=VARCHAR}, #{item.startTime,jdbcType=VARCHAR},
+            #{item.endTime,jdbcType=VARCHAR}, #{item.cron,jdbcType=VARCHAR},
+            #{item.state,jdbcType=INTEGER}, #{item.locked,jdbcType=BIT} ,
+            #{item.fullTableSynchronize,jdbcType=BIT}
+            )
+        </foreach>
+    </insert>
+</mapper>

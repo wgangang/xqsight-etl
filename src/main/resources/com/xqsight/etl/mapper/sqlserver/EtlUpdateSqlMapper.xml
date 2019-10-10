@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xqsight.etl.mapper.sqlserver.EtlUpdateSqlMapper">
+
+    <resultMap id="BaseResultMap" type="com.xqsight.etl.domain.EtlUpdateSql">
+        <id column="tableName" jdbcType="VARCHAR" property="tableName"/>
+        <result column="updateSql" jdbcType="LONGVARCHAR" property="updateSql"/>
+        <result column="dataxJson" jdbcType="LONGVARCHAR" property="dataxJson"/>
+    </resultMap>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+        DELETE FROM
+            etl_update_sql
+        WHERE
+            tableName = #{tableName,jdbcType=VARCHAR}
+    </delete>
+
+    <insert id="insert" parameterType="com.xqsight.etl.domain.EtlUpdateSql">
+        INSERT INTO etl_update_sql
+            (tableName, updateSql, dataxJson)
+        VALUES
+            (#{tableName,jdbcType=VARCHAR}, #{updateSql,jdbcType=LONGVARCHAR}, #{dataxJson,jdbcType=LONGVARCHAR})
+    </insert>
+
+    <update id="updateByPrimaryKey" parameterType="com.xqsight.etl.domain.EtlUpdateSql">
+        UPDATE etl_update_sql
+        SET updateSql = #{updateSql,jdbcType=LONGVARCHAR},
+            dataxJson = #{dataxJson,jdbcType=LONGVARCHAR}
+        WHERE tableName = #{tableName,jdbcType=VARCHAR}
+    </update>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT tableName, updateSql, dataxJson
+        FROM etl_update_sql
+        WHERE tableName = #{tableName,jdbcType=VARCHAR}
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT tableName, updateSql, dataxJson
+        FROM etl_update_sql WHERE deleted = 0
+    </select>
+
+    <select id="selectAllTableName" resultType="java.lang.String">
+        SELECT tableName
+        FROM etl_update_sql
+    </select>
+
+</mapper>

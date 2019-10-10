@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xqsight.etl.mapper.sqlserver.MergeMapper">
+
+    <update id="merge">
+        ${sql}
+    </update>
+
+    <update id="truncateTable" parameterType="java.lang.String">
+      TRUNCATE TABLE vip_temp_${tableName}
+    </update>
+
+</mapper>

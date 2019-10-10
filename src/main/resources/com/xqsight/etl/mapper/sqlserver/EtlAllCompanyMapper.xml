@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xqsight.etl.mapper.sqlserver.EtlAllCompanyMapper">
+
+    <resultMap id="BaseResultMap" type="com.xqsight.etl.domain.EtlAllCompany">
+        <result column="franchiseeUuid" jdbcType="NVARCHAR" property="franchiseeUuid"/>
+        <result column="companyUuid" jdbcType="NVARCHAR" property="companyUuid"/>
+        <result column="zonePart" jdbcType="VARCHAR" property="zonePart"/>
+        <result column="companyAccount" jdbcType="NVARCHAR" property="companyAccount"/>
+        <result column="companyName" jdbcType="NVARCHAR" property="companyName"/>
+        <result column="companyCity" jdbcType="NVARCHAR" property="companyCity"/>
+        <result column="CompanyType" jdbcType="NVARCHAR" property="companyType"/>
+        <result column="serverIp" jdbcType="NVARCHAR" property="serverIp"/>
+        <result column="dbName" jdbcType="NVARCHAR" property="dbName"/>
+        <result column="userName" jdbcType="VARCHAR" property="userName"/>
+        <result column="password" jdbcType="VARCHAR" property="password"/>
+        <result column="fullSynchronize" jdbcType="BIT" property="fullSynchronize"/>
+    </resultMap>
+
+    <delete id="deleteByCompanyUuid" parameterType="java.lang.String">
+        DELETE FROM etl_all_company
+        WHERE companyUuid = #{companyUuid,jdbcType=VARCHAR}
+     </delete>
+
+    <insert id="insert" parameterType="com.xqsight.etl.domain.EtlAllCompany">
+        INSERT INTO etl_all_company
+            (franchiseeUuid,companyUuid,zonePart,companyAccount,companyName,companyCity,serverIp,dbName,userName,password,fullTransed)
+        VALUES (
+            #{franchiseeUuid,jdbcType=NVARCHAR},#{companyUuid,jdbcType=NVARCHAR},#{zonePart,jdbcType=NVARCHAR}, #{companyAccount,jdbcType=VARCHAR}, #{companyName,jdbcType=NVARCHAR},
+            #{companyCity,jdbcType=NVARCHAR}, #{serverIp,jdbcType=NVARCHAR}, #{dbName,jdbcType=NVARCHAR},
+            #{userName,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, #{fullTransed,jdbcType=BIT})
+    </insert>
+
+    <update id="updateByCompanyUuid" parameterType="com.xqsight.etl.domain.EtlAllCompany">
+    update All_CompanyList
+    set serverip = #{serverip,jdbcType=VARCHAR},
+      zonepart = #{zonepart,jdbcType=VARCHAR},
+      companyaccount = #{companyaccount,jdbcType=VARCHAR},
+      companyname = #{companyname,jdbcType=VARCHAR},
+      companycity = #{companycity,jdbcType=VARCHAR},
+      dbname = #{dbname,jdbcType=VARCHAR},
+      createtime = #{createtime,jdbcType=TIMESTAMP},
+      username = #{username,jdbcType=VARCHAR},
+      password = #{password,jdbcType=VARCHAR},
+      fulltransed = #{fulltransed,jdbcType=BIT}
+        where companyuuid = #{companyuuid,jdbcType=VARCHAR}
+    </update>
+
+    <select id="selectByCompanyUuid" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT
+            companyUuid,zonePart,companyAccount,companyName,companyCity,serverIp,dbName,userName,password,fullSynchronize
+        FROM etl_all_company
+        WHERE companyUuid = #{companyUuid,jdbcType=VARCHAR}
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT
+            franchiseeUuid,companyUuid,zonePart,companyAccount,companyName,companyCity,serverIp,dbName,userName,password,fullSynchronize
+        FROM etl_all_company WHERE deleted = 0
+    </select>
+
+    <update id="updateAllFullSynchronize">
+        UPDATE etl_all_company SET fullSynchronize = 0
+    </update>
+
+</mapper>

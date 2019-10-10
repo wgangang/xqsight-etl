@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xqsight.etl.mapper.sqlserver.SourceCompanyMapper">
+
+    <resultMap id="BaseResultMap" type="com.xqsight.etl.domain.SourceCompany">
+        <result column="CompanyUUid" jdbcType="NVARCHAR" property="companyUuid"/>
+        <result column="zonePart" jdbcType="VARCHAR" property="zonePart"/>
+        <result column="companyAccount" jdbcType="NVARCHAR" property="companyAccount"/>
+        <result column="companyName" jdbcType="NVARCHAR" property="companyName"/>
+        <result column="companyCity" jdbcType="NVARCHAR" property="companyCity"/>
+        <result column="CompanyType" jdbcType="NVARCHAR" property="companyType"/>
+        <result column="serverIp" jdbcType="NVARCHAR" property="serverIp"/>
+        <result column="dbName" jdbcType="NVARCHAR" property="dbName"/>
+        <result column="userName" jdbcType="VARCHAR" property="userName"/>
+        <result column="password" jdbcType="VARCHAR" property="password"/>
+        <result column="fullSynchronize" jdbcType="BIT" property="fullSynchronize"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.xqsight.etl.domain.SourceCompany">
+    INSERT INTO etl_all_company
+        (companyUuid,zonePart,companyAccount,companyName,companyCity,serverIp,dbName,userName,password,fullTransed)
+    VALUES (
+        #{companyUuid,jdbcType=NVARCHAR},#{zonePart,jdbcType=NVARCHAR}, #{companyAccount,jdbcType=VARCHAR}, #{companyName,jdbcType=NVARCHAR},
+        #{companyCity,jdbcType=NVARCHAR}, #{serverIp,jdbcType=NVARCHAR}, #{dbName,jdbcType=NVARCHAR},
+        #{userName,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, #{fullTransed,jdbcType=BIT})
+    </insert>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+    SELECT
+        companyUuid,zonePart,companyAccount,companyName,companyCity,serverIp,dbName,userName,password,fullTransed
+    FROM etl_all_company WHERE deleted = 0
+    </select>
+</mapper>
