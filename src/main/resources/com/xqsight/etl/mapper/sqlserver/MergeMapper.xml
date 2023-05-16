@@ -7,7 +7,7 @@
     </update>
 
     <update id="truncateTable" parameterType="java.lang.String">
-      TRUNCATE TABLE vip_temp_${tableName}
+      TRUNCATE TABLE temp_${tableName}
     </update>
 
 </mapper>

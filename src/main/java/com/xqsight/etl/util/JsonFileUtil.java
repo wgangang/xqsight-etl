@@ -9,7 +9,6 @@ import com.xqsight.etl.domain.EtlJobInfo;
 import com.xqsight.etl.domain.EtlAllCompany;
 import com.xqsight.etl.metadata.Identification;
 import com.xqsight.etl.common.jobinfo.*;
-import com.xqsight.etl.common.jobinfo.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +33,8 @@ public class JsonFileUtil {
 
     public static Logger log = LoggerFactory.getLogger(JsonFileUtil.class);
 
+    public static final String[] tablesName = {"tx_transaction", "pro_customer", "com_contact", "pro_intentionaddress", "sys_SystemConfig", "com_district", "com_area"};
+
     /**
      * 生成datax需要的JSON 文件 信息
      *
@@ -52,9 +53,8 @@ public class JsonFileUtil {
 
         Integer sn = Integer.valueOf(spiltNum);
         Integer cn = Integer.valueOf(channelNum);
-
         for (EtlJobInfo jobInfo : jobInfoList) {
-            if(Objects.isNull(jobInfo.getFullTableSynchronize())){
+            if (Objects.isNull(jobInfo.getFullTableSynchronize())) {
                 jobInfo.setFullTableSynchronize(Boolean.FALSE);
             }
 
@@ -82,7 +82,7 @@ public class JsonFileUtil {
             String readerSql = dataxJob.takeReaderSql()[0];
 
             boolean isIncrement = !jobInfo.getFullTableSynchronize();
-            if(isIncrement) {
+            if (isIncrement) {
                 isIncrement = jobInfo.getJobType().trim().equalsIgnoreCase(Identification.METAJOBINFO_JOBTYPE.INCREMRNT);
             }
             if (targetCompanyList.size() > sn) {
@@ -93,7 +93,7 @@ public class JsonFileUtil {
                 jobInfoListDEL.add(jobInfo);
             } else {
                 List<String> sqlN = generateReaderSql(readerSql, where, jobInfo.getStartTime(), jobInfo.getEndTime(), targetCompanyList, isIncrement);
-                DataxJob dataxJob1 = addNewDataxJob(sqlN, jobInfo, dataxJob, cn);
+                DataxJob dataxJob1 = addNewDataxJob(targetCompanyList.get(0), sqlN, jobInfo, dataxJob, cn);
                 dataxJobMapNew.put(jsonName, dataxJob1);
             }
         }
@@ -104,6 +104,7 @@ public class JsonFileUtil {
             jobInfoList.removeAll(jobInfoListDEL);
         }
         writeDatax(new DataxJobMap(dataxJobMapNew));
+
     }
 
     public static String getIp(String readerJdbc) {
@@ -130,7 +131,7 @@ public class JsonFileUtil {
                         .append(Constant.UNDER_LINE).append(jsonNames[1]);
 
                 List<String> sqlN = generateReaderSql(readerSql, where, jobInfo.getStartTime(), jobInfo.getEndTime(), list, isIncrement);
-                DataxJob dataxJob1 = addNewDataxJob(sqlN, jobInfo, dataxJob, cn);
+                DataxJob dataxJob1 = addNewDataxJob(list.get(0), sqlN, jobInfo, dataxJob, cn);
                 dataxJobMapNew.put(newJsonName.toString(), dataxJob1);
                 EtlJobInfo j = new EtlJobInfo();
                 BeanUtils.copyProperties(jobInfo, j);
@@ -143,11 +144,11 @@ public class JsonFileUtil {
         return jobInfoListTemp;
     }
 
-    private static DataxJob addNewDataxJob(List<String> sqlN, EtlJobInfo jobInfo, DataxJob dataxJob, Integer cn) {
+    private static DataxJob addNewDataxJob(EtlAllCompany company, List<String> sqlN, EtlJobInfo jobInfo, DataxJob dataxJob, Integer cn) {
         List<ReaderConnection> readerConnectionList = new ArrayList<>();
         for (int i = 0; i < sqlN.size(); i++) {
             ReaderConnection readerConnection = new ReaderConnection();
-            readerConnection.setJdbcUrl(new String[]{jobInfo.getReaderJdbc()});
+            readerConnection.setJdbcUrl(new String[]{"jdbc:sqlserver://" + company.getServerIp() + ":1433"});
             readerConnection.setQuerySql(new String[]{sqlN.get(i)});
             readerConnectionList.add(readerConnection);
         }
@@ -183,8 +184,14 @@ public class JsonFileUtil {
         writerParameter.setConnection(writerConnection);
         writerConnection[0] = new WriterConnection();
         writerConnection[0].setJdbcUrl(jobInfo.getWriterJdbc());
-        writerConnection[0].setTable(dataxJob.getJob().getContent()[0].getWriter().getParameter().getConnection()[0].getTable());
-
+        String synMethod = PropertyUtils.getValue(PropertyUtils.SYN_METHOD);
+        if (StringUtils.equals(synMethod, "init")) {
+            String t1 = dataxJob.getJob().getContent()[0].getWriter().getParameter().getConnection()[0].getTable()[0];
+            String tableName = StringUtils.replace(t1, "temp_", "");
+            writerConnection[0].setTable(new String[]{tableName});
+        } else {
+            writerConnection[0].setTable(dataxJob.getJob().getContent()[0].getWriter().getParameter().getConnection()[0].getTable());
+        }
         Reader reader = new Reader();
         contents[0].setReader(reader);
         reader.setName(dataxJob.getJob().getContent()[0].getReader().getName());
@@ -192,8 +199,8 @@ public class JsonFileUtil {
         ReaderParameter readerParameter = new ReaderParameter();
         reader.setParameter(readerParameter);
         readerParameter.setWhere(dataxJob.getJob().getContent()[0].getReader().getParameter().getWhere());
-        readerParameter.setUsername(jobInfo.getReaderName());
-        readerParameter.setPassword(jobInfo.getReaderPword());
+        readerParameter.setUsername(company.getUserName());
+        readerParameter.setPassword(company.getPassword());
 
         ReaderConnection[] readerConnections = readerConnectionList.toArray(new ReaderConnection[readerConnectionList.size()]);
         readerParameter.setConnection(readerConnections);
@@ -215,7 +222,7 @@ public class JsonFileUtil {
         String readerWhere = StringUtils.substringAfter(sql, Constant.WHERE_SQL);
         List<String> readerSqlList = Lists.newArrayList();
         for (EtlAllCompany company : companyList) {
-            String readerSql = generateReaderSql(sql, company.getCompanyUuid(), company.getFranchiseeUuid(), company.getDbName());
+            String readerSql = generateReaderSql(sql, company.getCompanyUuid(), company.getDbName());
             String sTime = startTime;
             if (company.getFullSynchronize() || !isIncrement) {
                 readerSqlList.add(readerSql + " where " + readerWhere);
@@ -231,11 +238,10 @@ public class JsonFileUtil {
      *
      * @param sql
      * @param companyUuid
-     * @param franchiseeUuid
      * @param dbName
      * @return
      */
-    private static String generateReaderSql(String sql, String companyUuid, String franchiseeUuid, String dbName) {
+    private static String generateReaderSql(String sql, String companyUuid, String dbName) {
         if (StringUtils.isBlank(companyUuid)) {
             return updateSql(sql, dbName);
         }
@@ -243,11 +249,16 @@ public class JsonFileUtil {
         String tableName = StringUtils.substringBetween(sql, Constant.FROM_SQL, Constant.WHERE_SQL).trim();
         String columns = StringUtils.substringBetween(sql, Constant.SELECT_SQL, Constant.FROM_SQL);
 
+        for (String table : tablesName) {
+            String realTableName = new StringBuffer(Constant.BLANK_SQL)
+                    .append(dbName).append(Constant.SPACE_SQL).append(table).toString();
+            tableName = StringUtils.replace(tableName, table, realTableName);
+        }
+
+
         StringBuffer readSql = new StringBuffer(Constant.SELECT_SQL)
-                .append(" companyUuid='").append(franchiseeUuid).append("',")
-                .append("externalCompanyUuid='").append(companyUuid).append("',")
+                .append(" companyUuid='").append(companyUuid).append("',")
                 .append(columns).append(Constant.BLANK_SQL).append(Constant.FROM_SQL)
-                .append(Constant.BLANK_SQL).append(dbName).append(Constant.SPACE_SQL)
                 .append(tableName);
 
         return readSql.toString();
@@ -256,9 +267,15 @@ public class JsonFileUtil {
     private static String updateSql(String sql, String dbName) {
         String sqlMain = StringUtils.substringBefore(sql, Constant.FROM_SQL);
         String tableName = StringUtils.substringBetween(sql, Constant.FROM_SQL, Constant.WHERE_SQL).trim();
+
+        for (String table : tablesName) {
+            String realTableName = new StringBuffer(Constant.BLANK_SQL)
+                    .append(dbName).append(Constant.SPACE_SQL).append(table).toString();
+            tableName = StringUtils.replace(tableName, table, realTableName);
+        }
+
         StringBuffer readSql = new StringBuffer(sqlMain)
                 .append(Constant.BLANK_SQL).append(Constant.FROM_SQL)
-                .append(Constant.BLANK_SQL).append(dbName).append(Constant.SPACE_SQL)
                 .append(tableName);
 
         return readSql.toString();

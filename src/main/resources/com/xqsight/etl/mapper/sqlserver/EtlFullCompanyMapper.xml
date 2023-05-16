@@ -11,14 +11,14 @@
 
     <insert id="insert" parameterType="com.xqsight.etl.domain.EtlFullCompany">
         INSERT INTO
-            etl_full_company (companyUuid, [count], [type],deleted)
+            etl_full_company (companyUuid, count, type,deleted)
         VALUES
             (#{companyUuid,jdbcType=VARCHAR}, #{count,jdbcType=INTEGER}, #{type,jdbcType=VARCHAR},0)
     </insert>
 
     <insert id="batchInsert" parameterType="com.xqsight.etl.domain.EtlFullCompany">
         INSERT INTO
-        etl_full_company (companyUuid, [count], [type],deleted)
+        etl_full_company (companyUuid, count, type,deleted)
         VALUES
         <foreach collection="etlFullCompanies" item="item" index="index" separator=",">
             (#{item.companyUuid,jdbcType=VARCHAR}, #{item.count,jdbcType=INTEGER}, #{item.type,jdbcType=VARCHAR},0)
@@ -26,7 +26,7 @@
     </insert>
 
     <select id="selectAll" resultMap="BaseResultMap">
-        SELECT companyUuid, [count], [type] FROM etl_full_company where deleted = 0
+        SELECT companyUuid, count, type FROM etl_full_company where deleted = 0
     </select>
 
     <select id="selectNeedEtl" resultType="java.lang.String">
@@ -35,7 +35,11 @@
 
     <update id="updateEtlFullCompanyCount">
         UPDATE etl_full_company
-        SET [count] = count + 1
-        WHERE  [count] &lt; 3 AND companyUuid IN (SELECT companyUuid from etl_all_company)
+        SET count = count + 1
+        WHERE companyUuid in (
+        <foreach collection="companyUuidList" item="companyUuid" separator=" , ">
+            #{companyUuid}
+        </foreach>
+        )
     </update>
 </mapper>

@@ -24,9 +24,9 @@
 
     <insert id="insert" parameterType="com.xqsight.etl.domain.EtlAllCompany">
         INSERT INTO etl_all_company
-            (franchiseeUuid,companyUuid,zonePart,companyAccount,companyName,companyCity,serverIp,dbName,userName,password,fullTransed)
+            (companyUuid,zonePart,companyAccount,companyName,companyCity,serverIp,dbName,userName,password,fullTransed)
         VALUES (
-            #{franchiseeUuid,jdbcType=NVARCHAR},#{companyUuid,jdbcType=NVARCHAR},#{zonePart,jdbcType=NVARCHAR}, #{companyAccount,jdbcType=VARCHAR}, #{companyName,jdbcType=NVARCHAR},
+            #{jdbcType=NVARCHAR},#{companyUuid,jdbcType=NVARCHAR},#{zonePart,jdbcType=NVARCHAR}, #{companyAccount,jdbcType=VARCHAR}, #{companyName,jdbcType=NVARCHAR},
             #{companyCity,jdbcType=NVARCHAR}, #{serverIp,jdbcType=NVARCHAR}, #{dbName,jdbcType=NVARCHAR},
             #{userName,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, #{fullTransed,jdbcType=BIT})
     </insert>
@@ -55,7 +55,7 @@
 
     <select id="selectAll" resultMap="BaseResultMap">
         SELECT
-            franchiseeUuid,companyUuid,zonePart,companyAccount,companyName,companyCity,serverIp,dbName,userName,password,fullSynchronize
+            companyUuid,zonePart,companyAccount,companyName,companyCity,serverIp,dbName,userName,password,fullSynchronize
         FROM etl_all_company WHERE deleted = 0
     </select>
 

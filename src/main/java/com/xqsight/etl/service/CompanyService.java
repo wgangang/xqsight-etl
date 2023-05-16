@@ -65,7 +65,7 @@ public class CompanyService {
                 }).map(company -> {
                     if (Objects.isNull(MapUtils.getObject(etlFullCompanyMap, company.getCompanyUuid()))) {
                         /** 新公司同步全量 */
-                        company.setFullSynchronize(Boolean.TRUE);
+                        company.setFullSynchronize(true);
                         EtlFullCompany fullEtlCompany = new EtlFullCompany();
                         fullEtlCompany.setCompanyUuid(company.getCompanyUuid());
                         fullEtlCompany.setCount(0);
@@ -75,17 +75,17 @@ public class CompanyService {
                     return company;
                 }).collect(Collectors.groupingBy(EtlAllCompany::getServerIp));
 
-        log.info("执行的公司数：{}", targetCompanyMap.values().stream().collect(Collectors.toList()).size());
+        log.info("执行的公司数：{}", targetCompanyMap.values().stream().flatMap(c -> c.stream()).collect(Collectors.toList()).size());
 
         return targetCompanyMap;
     }
+
 
     /**
      *
      */
     public void fullEtlEnd() {
         etlAllCompanyMapper.updateAllFullSynchronize();
-        fullEtlCompanyMapper.updateEtlFullCompanyCount();
     }
 }
 

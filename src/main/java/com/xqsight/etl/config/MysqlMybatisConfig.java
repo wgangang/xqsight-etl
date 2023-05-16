@@ -1,4 +1,3 @@
-/*
 package com.xqsight.etl.config;
 
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -44,13 +43,12 @@ public class MysqlMybatisConfig {
     }
 
 
-    */
 /**
      * 用于实际查询的sql工具,传统dao开发形式可以使用这个,基于mapper代理则不需要注入
      *
      * @param sqlSessionFactory
      * @return
-     *//*
+     */
 
     @Bean(name = "mysqlSqlSessionTemplate")
     public SqlSessionTemplate mysqlSqlSessionTemplate(@Qualifier("mysqlSqlSessionFactoryBean") SqlSessionFactory sqlSessionFactory) {
@@ -62,4 +60,3 @@ public class MysqlMybatisConfig {
         return new TransactionTemplate(new DataSourceTransactionManager(dataSource));
     }
 }
-*/

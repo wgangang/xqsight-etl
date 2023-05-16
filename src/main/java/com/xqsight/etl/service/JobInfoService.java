@@ -148,7 +148,7 @@ public class JobInfoService {
                         errorInfo.setErrorInfo(line);
                         errorInfo.setJsonName(jsonName);
                         errorInfoMapper.insert(errorInfo);
-                        DingtalkUtil.reportMarkdownMessage("大客户ETL错误通知", PropertyUtils.getValue(Constant.ENV) + "环境：" + jsonName + ",拉去数据失败", line);
+                        //DingtalkUtil.reportMarkdownMessage("大客户ETL错误通知", PropertyUtils.getValue(Constant.ENV) + "环境：" + jsonName + ",拉去数据失败", line);
                     }
                 }
             } catch (Exception e) {

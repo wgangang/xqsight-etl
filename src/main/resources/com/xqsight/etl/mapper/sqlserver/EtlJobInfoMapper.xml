@@ -11,13 +11,12 @@
         <result column="writerName" jdbcType="VARCHAR" property="writerName"/>
         <result column="writerPword" jdbcType="VARCHAR" property="writerPword"/>
         <result column="jobType" jdbcType="VARCHAR" property="jobType"/>
-        <result column="condition" jdbcType="VARCHAR" property="condition"/>
+        <result column="conditions" jdbcType="VARCHAR" property="condition"/>
         <result column="startTime" jdbcType="VARCHAR" property="startTime"/>
         <result column="endTime" jdbcType="VARCHAR" property="endTime"/>
         <result column="cron" jdbcType="VARCHAR" property="cron"/>
         <result column="state" jdbcType="INTEGER" property="state"/>
         <result column="locked" jdbcType="BIT" property="locked"/>
-        <result column="fullTableSynchronize" jdbcType="BIT" property="fullTableSynchronize"/>
     </resultMap>
 
     <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
@@ -28,13 +27,13 @@
     <insert id="insert" parameterType="com.xqsight.etl.domain.EtlJobInfo">
         INSERT INTO etl_job_info (
             jsonName, readerJdbc, readerName,readerPword,
-            writerJdbc, writerName,writerPword, jobType, condition,startTime,
-            endTime, cron,state, locked,fullTableSynchronize)
+            writerJdbc, writerName,writerPword, jobType, conditions,startTime,
+            endTime, cron,state, locked)
         VALUES(
             #{jsonName,jdbcType=VARCHAR}, #{readerJdbc,jdbcType=VARCHAR}, #{readerName,jdbcType=VARCHAR}, #{readerPword,jdbcType=VARCHAR},
             #{writerJdbc,jdbcType=VARCHAR}, #{writerName,jdbcType=VARCHAR}, #{writerPword,jdbcType=VARCHAR}, #{jobType,jdbcType=VARCHAR},
             #{condition,jdbcType=VARCHAR}, #{startTime,jdbcType=VARCHAR}, #{endTime,jdbcType=VARCHAR}, #{cron,jdbcType=VARCHAR},
-            #{state,jdbcType=INTEGER}, #{locked,jdbcType=BIT}, #{fullTableSynchronize,jdbcType=BIT})
+            #{state,jdbcType=INTEGER}, #{locked,jdbcType=BIT})
     </insert>
 
     <update id="updateByPrimaryKey" parameterType="com.xqsight.etl.domain.EtlJobInfo">
@@ -46,7 +45,7 @@
         writerName = #{writerName,jdbcType=VARCHAR},
         writerPword = #{writerPword,jdbcType=VARCHAR},
         jobType = #{jobType,jdbcType=VARCHAR},
-        condition = #{condition,jdbcType=VARCHAR},
+        conditions = #{condition,jdbcType=VARCHAR},
         startTime = #{startTime,jdbcType=VARCHAR},
         endTime = #{endTime,jdbcType=VARCHAR},
         cron = #{cron,jdbcType=VARCHAR},
@@ -54,48 +53,47 @@
         <!-- <if test="newJsonname != null and newJsonname != ''">
              jsonname=#{newJsonname,jdbcType=BIT},
          </if>-->
-        locked = #{locked,jdbcType=BIT},
-        fullTableSynchronize = #{fullTableSynchronize,jdbcType=BIT}
+        locked = #{locked,jdbcType=BIT}
         WHERE jsonName = #{jsonName,jdbcType=VARCHAR}
     </update>
 
     <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
         SELECT
         jsonName, readerJdbc, readerName, readerPword, writerJdbc, writerName, writerPword,
-        jobType, condition, startTime, endTime, cron, state, locked, fullTableSynchronize
+        jobType, condition, startTime, endTime, cron, state, locked
         FROM etl_job_info
-        WHERE jsonName = #{jsonName,jdbcType=VARCHAR}
+        WHERE jsonName = #{jsonName,jdbcType=VARCHAR}  and deleted = 0
     </select>
 
     <select id="selectLikeJsonName" resultMap="BaseResultMap">
         SELECT
         jsonName, readerJdbc, readerName, readerPword, writerJdbc, writerName, writerPword,
-        jobType, condition, startTime, endTime, cron, state, locked, fullTableSynchronize
+        jobType, conditions, startTime, endTime, cron, state, locked
         FROM etl_job_info
-        WHERE jsonName like '%${jsonName}%'
+        WHERE jsonName like '%${jsonName}%'  and deleted = 0
     </select>
 
     <select id="selectAllWithNoLock" resultMap="BaseResultMap">
         SELECT
         jsonName, readerJdbc, readerName, readerPword, writerJdbc, writerName, writerPword,
-        jobType, condition, startTime, endTime, cron, state, locked, fullTableSynchronize
+        jobType, conditions, startTime, endTime, cron, state, locked
         FROM etl_job_info
-        WHERE locked=0
+        WHERE locked=0 and deleted = 0
     </select>
 
     <select id="selectAll" resultMap="BaseResultMap">
         SELECT
         jsonName, readerJdbc, readerName, readerPword, writerJdbc, writerName, writerPword,
-        jobType, condition, startTime, endTime, cron, state, locked, fullTableSynchronize
+        jobType, conditions, startTime, endTime, cron, state, locked, fullTableSynchronize
         FROM etl_job_info
     </select>
 
     <select id="selectByIp" resultMap="BaseResultMap">
         SELECT
         jsonName, readerJdbc, readerName, readerPword, writerJdbc, writerName, writerPword,
-        jobType, condition, startTime, endTime, cron, state, locked, fullTableSynchronize
+        jobType, condition, startTime, endTime, cron, state, locked
         FROM etl_job_info
-        WHERE jsonName like '%${ip}%'
+        WHERE jsonName like '%${ip}%'  and deleted = 0
     </select>
 
     <update id="lockJobByName" parameterType="java.lang.String">
@@ -104,29 +102,29 @@
 
     <update id="unlockJobAndUpdateState">
         update etl_job_info set state = #{state} ,locked = 0
-        WHERE locked = 1 AND jsonName LIKE '%${jsonName}%'
+        WHERE locked = 1 AND jsonName LIKE '%${jsonName}%'  and deleted = 0
     </update>
 
     <update id="unlockJob">
-        UPDATE etl_job_info SET locked = 0,fullTableSynchronize = 0
-        WHERE locked = 1 and jsonName like '%${jsonName}%'
+        UPDATE etl_job_info SET locked = 0
+        WHERE locked = 1 and jsonName like '%${jsonName}%'  and deleted = 0
     </update>
 
     <update id="updateJobStatus">
-        UPDATE etl_job_info SET state = #{status} WHERE jsonName=#{jsonName}
+        UPDATE etl_job_info SET state = #{status} WHERE jsonName=#{jsonName}  and deleted = 0
     </update>
 
     <update id="updateJobSuccessStatus" parameterType="com.xqsight.etl.domain.EtlJobInfo">
         UPDATE etl_job_info
         SET startTime = #{startTime}, endTime = #{endTime}, state = 0
-        WHERE jsonName = #{jsonName}
+        WHERE jsonName = #{jsonName}  and deleted = 0
     </update>
 
     <insert id="register" parameterType="com.xqsight.etl.domain.EtlJobInfo">
         INSERT INTO etl_job_info (
         jsonName, readerJdbc, readerName,readerPword,
-        writerJdbc, writerName,writerPword, jobType, condition,startTime,
-        endTime, cron,state, locked, fullTableSynchronize)VALUES
+        writerJdbc, writerName,writerPword, jobType, conditions,startTime,
+        endTime, cron,state, locked)VALUES
         <foreach collection="jobInfoList" item="item" index="index" separator=",">
             ( #{item.jsonName,jdbcType=VARCHAR}, #{item.readerJdbc,jdbcType=VARCHAR},
             #{item.readerName,jdbcType=VARCHAR}, #{item.readerPword,jdbcType=VARCHAR},
@@ -134,8 +132,7 @@
             #{item.writerPword,jdbcType=VARCHAR}, #{item.jobType,jdbcType=VARCHAR},
             #{item.condition,jdbcType=VARCHAR}, #{item.startTime,jdbcType=VARCHAR},
             #{item.endTime,jdbcType=VARCHAR}, #{item.cron,jdbcType=VARCHAR},
-            #{item.state,jdbcType=INTEGER}, #{item.locked,jdbcType=BIT} ,
-            #{item.fullTableSynchronize,jdbcType=BIT}
+            #{item.state,jdbcType=INTEGER}, #{item.locked,jdbcType=BIT}
             )
         </foreach>
     </insert>

@@ -32,7 +32,7 @@ import java.util.concurrent.ExecutorService;
 @Slf4j
 public class VipEtlMain {
 
-    public static final int CORE_THREADS = 10;
+    public static final int CORE_THREADS = 5;
 
     public static ExecutorService executorService = null;
 
@@ -46,7 +46,7 @@ public class VipEtlMain {
         String dateBefore = args.length > 1 && StringUtils.isNotBlank(args[1]) ? args[1] : "0";
         log.info("dateBefore = {}", dateBefore);
 
-        String channelNum = args.length > 2 && StringUtils.isNotBlank(args[2]) ? args[2] : "10";
+        String channelNum = args.length > 2 && StringUtils.isNotBlank(args[2]) ? args[2] : "5";
         log.info("channelNum = {}", channelNum);
 
         String spiltNum = args.length > 2 && StringUtils.isNotBlank(args[3]) ? args[3] : "200";

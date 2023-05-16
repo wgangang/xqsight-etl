@@ -50,5 +50,5 @@ public interface EtlFullCompanyMapper {
      *
      * @return
      */
-    int updateEtlFullCompanyCount();
+    int updateEtlFullCompanyCount(@Param("companyUuidList") List<String> companyUuidList);
 }

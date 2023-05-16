@@ -28,7 +28,7 @@ public class DataSourceBuild {
         dataSource.setMaxWait(5000);
         dataSource.setTimeBetweenEvictionRunsMillis(5000);
         dataSource.setMinEvictableIdleTimeMillis(30000);
-        dataSource.setValidationQuery("SELECT 'x'");
+        dataSource.setValidationQuery("SELECT 1");
         dataSource.setTestWhileIdle(true);
         dataSource.setTestOnBorrow(true);
         dataSource.setTestOnReturn(true);

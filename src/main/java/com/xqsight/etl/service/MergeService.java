@@ -85,9 +85,9 @@ public class MergeService {
                 .map(EtlJobInfo::getJsonName).map(name -> StringUtils.split(name, Constant.UNDER_LINE)[1]).collect(Collectors.toSet());
         if (!jobJsonName.contains(etlUpdateSql.getTableName())) {
             int res = mergeMapper.truncateTable(etlUpdateSql.getTableName());
-            log.info("truncate temp table : vip_temp_{},result:{}", etlUpdateSql.getTableName(), res);
+            log.info("truncate temp table : temp_{},result:{}", etlUpdateSql.getTableName(), res);
         } else {
-            log.info("vip_temp_{} is lock,not truncate", etlUpdateSql.getTableName());
+            log.info("vtemp_{} is lock,not truncate", etlUpdateSql.getTableName());
         }
 
 

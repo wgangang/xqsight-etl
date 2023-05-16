@@ -13,9 +13,14 @@ import java.util.Properties;
  */
 public class PropertyUtils {
 
-    public static final String INVALID_COMPANY="companylist.invalid";
+    public static final String INVALID_COMPANY = "companylist.invalid";
 
-    public static final String JSON_FILE_DIR="jsonFileDir";
+    public static final String JSON_FILE_DIR = "jsonFileDir";
+
+    public static final String COMPANY_SIZE = "compamySizePer";
+
+    public static final String SYN_METHOD = "synMethod";
+
 
     private static Properties prop = null;
 
@@ -31,7 +36,7 @@ public class PropertyUtils {
         }
     }
 
-    public static String getValue(String key){
+    public static String getValue(String key) {
         return prop.getProperty(key);
     }
 
